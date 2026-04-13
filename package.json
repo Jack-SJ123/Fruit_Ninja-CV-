@@ -1,0 +1,10 @@
+{
+  "name": "fruit-ninja-cv",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local dependencies for Fruit Ninja CV hand tracking",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@mediapipe/tasks-vision": "^0.10.34"
+  }
+}

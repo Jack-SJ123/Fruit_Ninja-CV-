@@ -1,0 +1,344 @@
+/**
+ * styles.css - Main stylesheet for Fruit Ninja CV game
+ * Module 3: UI/UX & Game State
+ * Author: Angel Daniel Bustamante Perez
+ *
+ * Full-screen layout, z-index layer stack, dark/neon theme,
+ * animations, and responsive design.
+ */
+
+/* ── Reset & base ─────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+/* Hide scrollbars everywhere */
+::-webkit-scrollbar {
+    display: none;
+}
+body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* ── Game container ───────────────────────────────────── */
+
+#game-container,
+.game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #0a0a0a;
+}
+
+/* ── Layer stack (z-index) ────────────────────────────── */
+
+/* 1 – Webcam video feed */
+#webcam,
+#video,
+.game-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);               /* Mirror the webcam */
+    z-index: 1;
+    filter: blur(10px) saturate(0.7) brightness(0.6);
+}
+
+#webcam-highlight {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    z-index: 1;
+    opacity: 0.95;
+    pointer-events: none;
+    filter: brightness(1.08) saturate(1.1);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+}
+
+/* 2 – Trail / slash canvas */
+#trail-canvas,
+.trail-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+    /* Neon Bloom Filter */
+    filter: drop-shadow(0 0 12px rgba(0, 255, 255, 0.4)) contrast(1.1);
+}
+
+/* 3 – Three.js renderer canvas */
+#three-container,
+#three-canvas,
+.three-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+#three-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* 4 – UI overlay layer (menus, HUD, popups) */
+#ui-overlay,
+.ui-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+}
+
+/* ── Dark theme / neon palette ────────────────────────── */
+
+:root {
+    --fn-cyan:   #00FFFF;
+    --fn-green:  #00FF00;
+    --fn-red:    #ff4444;
+    --fn-dark:   rgba(0, 0, 0, 0.70);
+    --fn-glass:  rgba(10, 10, 10, 0.55);
+    --fn-font-mono: 'Courier New', Courier, monospace;
+    --fn-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif;
+}
+
+/* ── HUD styling ──────────────────────────────────────── */
+
+.hud-badge {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-family: var(--fn-font-mono);
+    font-weight: 700;
+    color: var(--fn-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.fn-splat {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(12px);
+    opacity: 0.7;
+    pointer-events: none;
+    animation: fn-splat-fade 1.5s ease-out forwards;
+    z-index: 10;
+}
+
+@keyframes fn-splat-fade {
+    0% { transform: scale(0.2); opacity: 0.8; }
+    20% { transform: scale(1.1) rotate(15deg); opacity: 0.7; }
+    100% { transform: scale(1.3) translateY(30px); opacity: 0; }
+}
+
+/* ── Overlay screens (menu / pause / gameover) ────────── */
+
+.overlay-screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #ffffff;
+    z-index: 100;
+    pointer-events: none;
+    user-select: none;
+}
+
+.overlay-screen.active {
+    display: flex;
+}
+
+.overlay-screen.frosted {
+    background: var(--fn-dark);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Combo glow ───────────────────────────────────────── */
+
+.combo-glow {
+    color: var(--fn-green);
+    text-shadow:
+        0 0 8px  rgba(0, 255, 0, 0.8),
+        0 0 20px rgba(0, 255, 0, 0.5),
+        0 0 40px rgba(0, 255, 0, 0.3);
+}
+
+/* ── Lives / hearts ───────────────────────────────────── */
+
+.heart {
+    display: inline-block;
+    font-size: 1.6rem;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+.heart.lost {
+    opacity: 0.2;
+    transform: scale(0.7);
+}
+
+/* ── Loading spinner ──────────────────────────────────── */
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--fn-cyan);
+    border-radius: 50%;
+    animation: fn-spin 0.8s linear infinite;
+}
+
+.loading-text {
+    margin-top: 16px;
+    font-size: 1rem;
+    color: #888888;
+    letter-spacing: 0.05em;
+}
+
+/* ── Score popup (float-up) ───────────────────────────── */
+
+.score-popup {
+    position: absolute;
+    font-family: var(--fn-font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--fn-green);
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+    pointer-events: none;
+    user-select: none;
+    animation: fn-floatUp 0.9s ease-out forwards;
+    z-index: 110;
+}
+
+/* ── Combo flash text ─────────────────────────────────── */
+
+.combo-flash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--fn-font-mono);
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    font-weight: 900;
+    color: var(--fn-green);
+    text-shadow:
+        0 0 16px rgba(0, 255, 0, 0.8),
+        0 0 40px rgba(0, 255, 0, 0.4);
+    pointer-events: none;
+    user-select: none;
+    animation: fn-comboFlash 0.8s ease-out forwards;
+    z-index: 115;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes fn-fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fn-slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fn-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+}
+
+@keyframes fn-countdownZoom {
+    0%   { transform: scale(2.5); opacity: 0; }
+    50%  { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fn-floatUp {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-60px); }
+}
+
+@keyframes fn-comboFlash {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+}
+
+@keyframes fn-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Responsive tweaks
+   ═══════════════════════════════════════════════════════ */
+
+/* Small phones (portrait) */
+@media (max-width: 480px) {
+    .hud-badge {
+        padding: 4px 10px;
+        font-size: 0.9rem;
+        border-radius: 6px;
+    }
+    .heart {
+        font-size: 1.2rem;
+    }
+}
+
+/* Tablets */
+@media (min-width: 481px) and (max-width: 1024px) {
+    .hud-badge {
+        font-size: 1.15rem;
+    }
+}
+
+/* Landscape phones: reduce vertical spacing */
+@media (max-height: 500px) {
+    .overlay-screen {
+        gap: 8px;
+    }
+}

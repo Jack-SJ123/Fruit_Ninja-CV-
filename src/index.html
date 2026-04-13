@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Ninja - AI Gesture Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Layer 1: Webcam Video -->
+        <video id="webcam" autoplay playsinline muted></video>
+        <video id="webcam-highlight" autoplay playsinline muted></video>
+
+        <!-- Layer 2: 2D Canvas for Trails -->
+        <canvas id="trail-canvas"></canvas>
+
+        <!-- Layer 3: Three.js WebGL Canvas (created by Three.js) -->
+        <div id="three-container"></div>
+
+        <!-- Layer 4: UI Overlays (managed by UIManager) -->
+        <div id="ui-overlay"></div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
